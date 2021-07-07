@@ -191,7 +191,8 @@ healthcheck(callback) {
         error = `\nError returned from GET request:\n${JSON.stringify(error)}`;
       } else {
         data = JSON.parse(data.body).result[0];
-        data = {
+        data = [ 
+          {
           "change_ticket_number": data.number,
           "active": data.active,
           "priority": data.priority,
@@ -199,7 +200,8 @@ healthcheck(callback) {
           "work_start": data.work_start,
           "work_end": data.work_end,
           "change_ticket_key": data.sys_id
-        };
+           },
+        ]
       }
       callback(data, error);
     });
