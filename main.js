@@ -83,7 +83,7 @@ class ServiceNowAdapter extends EventEmitter {
     this.healthcheck();
   }
 
- /**
+  /**
  * @memberof ServiceNowAdapter
  * @method healthcheck
  * @summary Check ServiceNow Health
@@ -114,7 +114,7 @@ healthcheck(callback) {
       * healthcheck(), execute it passing the error seen as an argument
       * for the callback's errorMessage parameter.
       */
-      error = this.emitOffline();
+      this.emitOffline();
    } else {
      /**
       * Write this block.
@@ -126,9 +126,10 @@ healthcheck(callback) {
       * parameter as an argument for the callback function's
       * responseData parameter.
       */
-      result = this.emitOnline();
+      this.emitOnline();
    }
-   callback(result, error);
+   if(callback)
+       callback(result, error);
  });
 }
 
@@ -141,7 +142,7 @@ healthcheck(callback) {
    */
   emitOffline() {
     this.emitStatus('OFFLINE');
-    log.error(`ServiceNow: Instance id ${this.id} is unavailable.`);
+    log.warn('ServiceNow: Instance is unavailable.');
   }
 
   /**
@@ -153,7 +154,7 @@ healthcheck(callback) {
    */
   emitOnline() {
     this.emitStatus('ONLINE');
-    log.debug('ServiceNow: Instance is available.');
+    log.info('ServiceNow: Instance is available.');
   }
 
   /**
@@ -185,23 +186,24 @@ healthcheck(callback) {
      * Note how the object was instantiated in the constructor().
      * get() takes a callback function.
      */
-
-    this.connector.get((data, error) => {
+      this.connector.get((data, error) => {
        if (error) {
         error = `\nError returned from GET request:\n${JSON.stringify(error)}`;
       } else {
-        data = JSON.parse(data.body).result[0];
-        data = [ 
-          {
-          "change_ticket_number": data.number,
-          "active": data.active,
-          "priority": data.priority,
-          "description": data.description,
-          "work_start": data.work_start,
-          "work_end": data.work_end,
-          "change_ticket_key": data.sys_id
-           },
-        ]
+        if (data.body) {
+             data = JSON.parse(data.body).result[0];
+            data = {"result": [ 
+            {
+            "change_ticket_number": data.number,
+            "active": data.active,
+            "priority": data.priority,
+            "description": data.description,
+            "work_start": data.work_start,
+            "work_end": data.work_end,
+            "change_ticket_key": data.sys_id
+            },
+            ] }
+        }
       }
       callback(data, error);
     });
@@ -223,20 +225,23 @@ healthcheck(callback) {
      * Note how the object was instantiated in the constructor().
      * post() takes a callback function.
      */
-     this.connector.post((data, error) => {
+    this.connector.post((data, error) => {
       if (error) {
         error = `\nError returned from POST request:\n${JSON.stringify(error)}`;
       } else {
-        data = JSON.parse(data.body).result[0];
-        data = {
-          "change_ticket_number": data.number,
-          "active": data.active,
-          "priority": data.priority,
-          "description": data.description,
-          "work_start": data.work_start,
-          "work_end": data.work_end,
-          "change_ticket_key": data.sys_id
-        };
+          if (data.body) {
+             data = JSON.parse(data.body).result[0];
+            data = { "result" : {
+            "change_ticket_number": data.number,
+            "active": data.active,
+            "priority": data.priority,
+            "description": data.description,
+            "work_start": data.work_start,
+            "work_end": data.work_end,
+            "change_ticket_key": data.sys_id
+                }
+            };
+          }
       }
       callback(data, error);
     });
