@@ -114,7 +114,7 @@ healthcheck(callback) {
       * healthcheck(), execute it passing the error seen as an argument
       * for the callback's errorMessage parameter.
       */
-      error = this.emitOffline();
+      this.emitOffline();
    } else {
      /**
       * Write this block.
@@ -126,7 +126,7 @@ healthcheck(callback) {
       * parameter as an argument for the callback function's
       * responseData parameter.
       */
-      result = this.emitOnline();
+      this.emitOnline();
    }
    callback(result, error);
  });
@@ -187,19 +187,10 @@ healthcheck(callback) {
      */
 
     this.connector.get((data, error) => {
-       if (error) {
+      if (error) {
         error = `\nError returned from GET request:\n${JSON.stringify(error)}`;
       } else {
-        data = JSON.parse(data.body).result[0];
-        data = {
-          "change_ticket_number": data.number,
-          "active": data.active,
-          "priority": data.priority,
-          "description": data.description,
-          "work_start": data.work_start,
-          "work_end": data.work_end,
-          "change_ticket_key": data.sys_id
-        };
+        data = `\nResponse returned from GET request:\n${JSON.stringify(data)}`;
       }
       callback(data, error);
     });
@@ -225,16 +216,7 @@ healthcheck(callback) {
       if (error) {
         error = `\nError returned from POST request:\n${JSON.stringify(error)}`;
       } else {
-        data = JSON.parse(data.body).result[0];
-        data = {
-          "change_ticket_number": data.number,
-          "active": data.active,
-          "priority": data.priority,
-          "description": data.description,
-          "work_start": data.work_start,
-          "work_end": data.work_end,
-          "change_ticket_key": data.sys_id
-        };
+        data = `\nResponse returned from POST request:\n${JSON.stringify(data)}`;
       }
       callback(data, error);
     });
